@@ -267,4 +267,6 @@ module.exports = async (req, res) => {
       message: 'Interner Server-Fehler'
     });
   }
+
+  console.log('Webhook wurde aufgerufen');
 };
