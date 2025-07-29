@@ -92,7 +92,7 @@ export default async function handler(req, res) {
       expStream: get('expStream (N)') || get('expStream') || get('13'),
       expFacebook: get('expFacbeook (M)') || get('expFacebook') || get('12'),
       wallet: get('wallet (G)') || get('wallet') || get('6'),
-      image: get('picture (S)') || get('image') || get('18'),
+      image: userRow[18] || '',
     });
   } catch (error) {
     res.status(500).json({ error: 'Serverfehler', details: error.message });
