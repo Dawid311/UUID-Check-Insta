@@ -136,7 +136,7 @@ async function findUserByUUID(uuid) {
 
     const sheets = await getGoogleSheetsClient();
     const spreadsheetId = process.env.SPREADSHEET_ID;
-    
+
     // Lese alle Daten aus dem Instagram Sheet (A:CZ wie in Ihrem Make.com Flow)
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -147,15 +147,24 @@ async function findUserByUUID(uuid) {
 
     const rows = response.data.values;
     if (!rows || rows.length <= 1) {
+      console.log('Keine oder zu wenige Zeilen geladen!');
       return null;
     }
 
+    // Debug: Zeige alle geladenen UUIDs und Zeilen
+    console.log('Alle geladenen Zeilen (ab Zeile 2):');
+    rows.slice(1).forEach((row, idx) => {
+      console.log(`Zeile ${idx + 2}: UUID='${row[0]}' | Vollständig:`, row);
+    });
+    console.log('Gesuchte UUID:', uuid);
+
     // Finde Zeile mit passender UUID (Spalte A)
     const userRow = rows.find((row, index) => {
-      return index > 0 && row[0] === uuid; // Skip header row
+      return index > 0 && row[0] === uuid;
     });
 
     if (!userRow) {
+      console.log('Keine passende UUID gefunden!');
       return null;
     }
 
