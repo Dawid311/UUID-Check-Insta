@@ -1,9 +1,8 @@
+
 const { google } = require('googleapis');
 
-// Level-Berechnungsfunktion basierend auf Ihrem Make.com Flow
 function calculateLevel(expTotal) {
   const exp = parseInt(expTotal) || 0;
-  
   if (exp <= 39) return 1;
   if (exp <= 119) return 2;
   if (exp <= 239) return 3;
@@ -56,7 +55,6 @@ function calculateLevel(expTotal) {
   return 50;
 }
 
-// Google Sheets Setup
 async function getGoogleSheetsClient() {
   const auth = new google.auth.GoogleAuth({
     credentials: {
@@ -73,17 +71,12 @@ async function getGoogleSheetsClient() {
     },
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly']
   });
-
   return google.sheets({ version: 'v4', auth });
 }
 
 async function findUserByUUID(uuid) {
   try {
-    // Für Demo/Test: Mock-Daten wenn keine echten Google Credentials vorhanden
     if (!process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_PRIVATE_KEY.includes('TEST_KEY_HIER')) {
-      console.log('🔧 Demo-Modus: Verwende Mock-Daten');
-      
-      // Mock-Daten entsprechend Ihrem Schema
       const mockData = {
         'test-uuid-123': {
           uuid: 'test-uuid-123',
@@ -130,45 +123,26 @@ async function findUserByUUID(uuid) {
           evaluatedAt: '2025-01-29'
         }
       };
-
       return mockData[uuid] || null;
     }
-
     const sheets = await getGoogleSheetsClient();
     const spreadsheetId = process.env.SPREADSHEET_ID;
-
-    // Lese alle Daten aus dem Instagram Sheet (A:CZ wie in Ihrem Make.com Flow)
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: 'Instagram!A:CZ',
       valueRenderOption: 'FORMATTED_VALUE',
       dateTimeRenderOption: 'FORMATTED_STRING'
     });
-
     const rows = response.data.values;
     if (!rows || rows.length <= 1) {
-      console.log('Keine oder zu wenige Zeilen geladen!');
       return null;
     }
-
-    // Debug: Zeige alle geladenen UUIDs und Zeilen
-    console.log('Alle geladenen Zeilen (ab Zeile 2):');
-    rows.slice(1).forEach((row, idx) => {
-      console.log(`Zeile ${idx + 2}: UUID='${row[0]}' | Vollständig:`, row);
-    });
-    console.log('Gesuchte UUID:', uuid);
-
-    // Finde Zeile mit passender UUID (Spalte A)
     const userRow = rows.find((row, index) => {
       return index > 0 && row[0] === uuid;
     });
-
     if (!userRow) {
-      console.log('Keine passende UUID gefunden!');
       return null;
     }
-
-    // Mappe die Daten entsprechend Ihres Schemas
     return {
       uuid: userRow[0] || '',
       username: userRow[1] || '',
@@ -192,13 +166,11 @@ async function findUserByUUID(uuid) {
       evaluatedAt: userRow[19] || ''
     };
   } catch (error) {
-    console.error('Error reading from Google Sheets:', error);
-    throw error;
+    return null;
   }
 }
 
 module.exports = async (req, res) => {
-  // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -206,39 +178,27 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
   try {
     const { uuid } = req.body;
-
     if (!uuid) {
       return res.status(400).json({
         status: 'error',
         message: 'UUID ist erforderlich'
       });
     }
-
-    // Suche User in Google Sheets
     const userData = await findUserByUUID(uuid);
-
     if (!userData) {
       return res.status(404).json({
         status: 'error',
         message: 'Benutzer nicht gefunden'
       });
     }
-
-    // Berechne Level basierend auf expTotal
     const calculatedLevel = calculateLevel(userData.expTotal);
-    
-    // Berechne Mining Power (Level * globalFactor)
     const globalFactor = parseFloat(userData.globalFactor) || 1;
     const miningPower = calculatedLevel * globalFactor;
-
-    // Antwort im gleichen Format wie Ihr Make.com Flow
     const response = {
       status: 'ok',
       message: 'Userboard erfolgreich geladen.',
@@ -249,7 +209,7 @@ module.exports = async (req, res) => {
       saved: userData.saved.toLowerCase(),
       expTotal: userData.expTotal,
       liveNFTBonus: userData.liveNFTBonus,
-      miningpower: Math.round(miningPower * 100) / 100, // Auf 2 Dezimalstellen gerundet
+      miningpower: Math.round(miningPower * 100) / 100,
       expTiktok: userData.expTiktok,
       expInstagram: userData.expInstagram,
       expStream: userData.expStream,
@@ -257,16 +217,11 @@ module.exports = async (req, res) => {
       wallet: userData.wallet,
       image: userData.picture
     };
-
     res.status(200).json(response);
-
   } catch (error) {
-    console.error('API Error:', error);
     res.status(500).json({
       status: 'error',
       message: 'Interner Server-Fehler'
     });
   }
-
-  console.log('Webhook wurde aufgerufen');
 };
