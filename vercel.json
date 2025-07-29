@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "@vercel/node"
+    }
+  },
+  "env": {
+    "GOOGLE_SHEETS_API_KEY": "@google_sheets_api_key",
+    "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@google_service_account_email",
+    "GOOGLE_PRIVATE_KEY": "@google_private_key",
+    "SPREADSHEET_ID": "159BP31mnBsZXyseTP36tBooaeCnVCHSoI3kvrV-UntQ"
+  }
+}
