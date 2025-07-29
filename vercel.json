@@ -2,12 +2,10 @@
   "version": 2,
   "functions": {
     "api/**/*.js": {
-      "runtime": "@vercel/node"
+      "runtime": "nodejs18.x"
     }
   },
   "env": {
-    "GOOGLE_SERVICE_ACCOUNT_EMAIL": "@google_service_account_email",
-    "GOOGLE_PRIVATE_KEY": "@google_private_key",
     "SPREADSHEET_ID": "159BP31mnBsZXyseTP36tBooaeCnVCHSoI3kvrV-UntQ"
   }
 }
