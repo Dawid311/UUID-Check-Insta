@@ -59,7 +59,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    // Hilfsfunktion für sichere Feldzuweisung
+    // Hilfsfunktion für sichere Feldzuweisungs
     const get = (col) => userRow[headers.indexOf(col)] || '';
 
     // Level-Berechnung (wie im Blueprint)
