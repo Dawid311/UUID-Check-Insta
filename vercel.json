@@ -1,9 +1,0 @@
-{
-  "version": 2,
-  "builds": [
-    { "src": "api/**/*.js", "use": "@vercel/node@18" }
-  ],
-  "env": {
-    "SPREADSHEET_ID": "159BP31mnBsZXyseTP36tBooaeCnVCHSoI3kvrV-UntQ"
-  }
-}
